@@ -43,6 +43,7 @@ type Auth[T any] struct {
 	signingMethod SigningMethod
 	currentKeyId string
 	maxIdleTime time.Duration
+	minIdleTime time.Duration
 	visitors map[string]Visit[T]
 }
 
@@ -56,7 +57,8 @@ func New[T any]() Auth[T] {
 		privateKey: newJwtPrivateKey(),
 		signingMethod: SigningMethodES256,
 		currentKeyId: "1",
-		maxIdleTime: 20 * time.Minute,
+		maxIdleTime: 30 * time.Minute,
+		minIdleTime: 10 * time.Minute,
 		visitors: make(map[string]Visit[T]),
 	}
 
@@ -80,6 +82,10 @@ func (a *Auth[T]) SetPrivateKey(keyPem []byte, signMethod ...SigningMethod) {
 
 func (a *Auth[T]) SetMaxIdleTime(maxIdleTime time.Duration) {
 	a.maxIdleTime = maxIdleTime
+}
+
+func (a *Auth[T]) SetMinIdleTime(minIdleTime time.Duration) {
+	a.minIdleTime = minIdleTime
 }
 
 func (a *Auth[T]) Authenticate(loginHandler func(username string) (hashedPwd string, userData T, err error)) fiber.Handler {

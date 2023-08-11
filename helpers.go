@@ -7,11 +7,6 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
-	"time"
-
-	//"errors"
-
-	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -102,53 +97,3 @@ func comparePasswords(hashedPwd, plainPwd string) bool {
 	
 	return err == nil
 }
-
-func validateJwtTokenAndReadUser[T any](jwtTokenString string, 
-	publicKey *ecdsa.PublicKey, currentKID string) (string, *T, error) {
-	var  usrClaims userClaims[T]
-
-	token, err := jwt.ParseWithClaims(jwtTokenString, &usrClaims,
-		func(token *jwt.Token) (any, error) {
-			if usrClaims.KID != currentKID {
-				return nil, errors.New("wrong or old key")
-			}
-			if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
-				return nil, errors.New("unexpected signing method")
-			}
-			return publicKey, nil
-		})
-	if err != nil {
-		return usrClaims.Subject, &usrClaims.UserData, err
-	}
-	if !token.Valid {
-		return "",nil, errors.New("login expired or token invalid")
-	}
-
-	return usrClaims.Subject, &usrClaims.UserData, nil
-}
-
-func GetJwtToken[T any](user User[T], maxIdleTime time.Duration, signMethod SigningMethod, privKey *ecdsa.PrivateKey) (string, error) {
-	var signingMethod jwt.SigningMethod
-	switch signMethod {
-	case SigningMethodES256:
-		signingMethod = jwt.SigningMethodES256
-	case SigningMethodES384:
-		signingMethod = jwt.SigningMethodES384
-	case SigningMethodES512:
-		signingMethod = jwt.SigningMethodES512
-	}
-
-	token := jwt.NewWithClaims(signingMethod, userClaims[T] {
-		RegisteredClaims: jwt.RegisteredClaims {
-			Subject: user.Username,
-			IssuedAt: jwt.NewNumericDate(time.Now()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(maxIdleTime)),
-		},
-		KID: "1",
-		UserData: user.UserData,
-	},)
-
-	signedToken, err := token.SignedString(privKey)
-	return signedToken, err
-}
-

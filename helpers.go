@@ -11,10 +11,11 @@ import (
 )
 
 type SigningMethod int
-const(
+
+const (
 	SigningMethodES256 SigningMethod = iota
-	SigningMethodES384 
-	SigningMethodES512 
+	SigningMethodES384
+	SigningMethodES512
 )
 
 func hashAndSalt(pwd string, cost ...int) (string, error) {
@@ -37,23 +38,23 @@ func hashAndSalt(pwd string, cost ...int) (string, error) {
 }
 
 func newJwtPrivateKey(signingMethod ...SigningMethod) *ecdsa.PrivateKey {
-	
+
 	var signMeth SigningMethod = SigningMethodES256
 	if len(signingMethod) > 0 {
 		signMeth = signingMethod[0]
 	}
 
 	var c elliptic.Curve
-	
-	switch(signMeth) {
+
+	switch signMeth {
 	case SigningMethodES256:
-		c = elliptic.P256();
+		c = elliptic.P256()
 	case SigningMethodES384:
-		c = elliptic.P384();
+		c = elliptic.P384()
 	case SigningMethodES512:
-		c = elliptic.P521();
+		c = elliptic.P521()
 	}
-	
+
 	pk, err := ecdsa.GenerateKey(c, rand.Reader)
 	if err != nil {
 		panic("failed to generate JWT key")
@@ -94,6 +95,6 @@ func comparePasswords(hashedPwd, plainPwd string) bool {
 	byteHash := []byte(hashedPwd)
 	plainPwdBytes := []byte(plainPwd)
 	err := bcrypt.CompareHashAndPassword(byteHash, plainPwdBytes)
-	
+
 	return err == nil
 }

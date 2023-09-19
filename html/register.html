@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Loop Over Struct Fields</title>
+</head>
+<body>
+    <h1>Register form</h1>
+    <form action="/register" method="post">
+        <label for="username">User name</label>
+        <input type="text" id="username" name="username"><br><br>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password"><br><br>
+        <label for="repeatPassword">Repeat password</label>
+        <input type="password" id="repeatPassword" name="repeatPassword"><br><br>
+        {{ range $index, $field := .Fields }}
+            <label for="{{ $field }}">{{ $field }}</label>
+            <input type="text" id="{{ $field }}" name="{{ $field }}"><br><br>
+        {{ end }}
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
